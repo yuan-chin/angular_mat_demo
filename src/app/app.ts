@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { RegisterComponent } from './register/register';
+import { SummitComponent } from './summit/summit';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RegisterComponent],
+  imports: [RouterOutlet, SummitComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

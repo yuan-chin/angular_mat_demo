@@ -1,0 +1,209 @@
+<div class="page-wrapper">
+
+    <!-- Top Bar with Dark Mode Toggle -->
+    <div class="top-bar">
+        <span class="toggle-label">{{ isDarkMode ? '🌙 Dark Mode' : '☀️ Light Mode' }}</span>
+        <mat-slide-toggle [checked]="isDarkMode" (change)="toggleDarkMode()"></mat-slide-toggle>
+    </div>
+
+    <!-- Hero Header -->
+    <div class="hero">
+        <div class="hero-badge">📅 March 15–16, 2025 · Manila, Philippines</div>
+        <h1>Youth Innovation<br>Summit 2025</h1>
+        <p class="subtitle">Join the next generation of tech leaders. Register below to secure your spot.</p>
+    </div>
+
+    <!-- Floating Form Card -->
+    <div class="form-card-wrapper">
+        <div class="form-container">
+            <form [formGroup]="formdata" (ngSubmit)="onClickSubmit(formdata.value)">
+
+                <!-- PERSONAL INFORMATION -->
+                <p class="section-heading">Personal Information</p>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Full Name</mat-label>
+                    <input matInput placeholder="e.g. Juan Dela Cruz" formControlName="fullName">
+                    @if (formdata.controls['fullName'].invalid && formdata.controls['fullName'].touched) {
+                    <mat-error>Full name is required.</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Email Address</mat-label>
+                    <input matInput type="email" placeholder="you@example.com" formControlName="email">
+                    @if (formdata.controls['email'].invalid && formdata.controls['email'].touched) {
+                    <mat-error>Enter a valid email address.</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Password</mat-label>
+                    <input matInput type="password" placeholder="Min 8 chars, starts with a letter"
+                        formControlName="password">
+                    <mat-hint>Alphanumeric only · starts with a letter · min 8 characters</mat-hint>
+                    @if (formdata.controls['password'].errors?.['required'] && formdata.controls['password'].touched) {
+                    <mat-error>Password is required.</mat-error>
+                    }
+                    @if (formdata.controls['password'].errors?.['invalidPassword'] &&
+                    formdata.controls['password'].touched) {
+                    <mat-error>Must start with a letter, alphanumeric only, min 8 characters.</mat-error>
+                    }
+                </mat-form-field>
+
+                <!-- Gender -->
+                <div class="radio-group">
+                    <label class="radio-label">Gender</label>
+                    <mat-radio-group formControlName="gender" class="gender-radio-group">
+                        <mat-radio-button value="male">Male</mat-radio-button>
+                        <mat-radio-button value="female">Female</mat-radio-button>
+                        <mat-radio-button value="other">Other</mat-radio-button>
+                    </mat-radio-group>
+                    @if (formdata.controls['gender'].invalid && formdata.controls['gender'].touched) {
+                    <span class="radio-error">Please select a gender.</span>
+                    }
+                </div>
+
+                <!-- EVENT DETAILS -->
+                <p class="section-heading">Event Details</p>
+
+                <!-- Date of Birth -->
+                <mat-form-field appearance="outline">
+                    <mat-label>Date of Birth</mat-label>
+                    <input matInput [matDatepicker]="dobPicker" [max]="maxBirthDate" placeholder="MM/DD/YYYY"
+                        formControlName="birthDate">
+                    <mat-hint>Must be born in 2006 or earlier</mat-hint>
+                    <mat-datepicker-toggle matIconSuffix [for]="dobPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #dobPicker></mat-datepicker>
+                    @if (formdata.controls['birthDate'].errors?.['required'] && formdata.controls['birthDate'].touched)
+                    {
+                    <mat-error>Date of birth is required.</mat-error>
+                    }
+                    @if (formdata.controls['birthDate'].errors?.['yearTooLate']) {
+                    <mat-error>You must be born in 2006 or earlier to register.</mat-error>
+                    }
+                </mat-form-field>
+
+                <!-- Preferred Session Time -->
+                <mat-form-field appearance="outline">
+                    <mat-label>Preferred Session Time</mat-label>
+                    <input matInput [matTimepicker]="sessionTimer" formControlName="sessionTime"
+                        placeholder="Pick a time">
+                    <mat-timepicker-toggle matIconSuffix [for]="sessionTimer"></mat-timepicker-toggle>
+                    <mat-timepicker #sessionTimer></mat-timepicker>
+                    @if (formdata.controls['sessionTime'].invalid && formdata.controls['sessionTime'].touched) {
+                    <mat-error>Please pick a preferred session time.</mat-error>
+                    }
+                </mat-form-field>
+
+                <!-- City Autocomplete -->
+                <mat-form-field appearance="outline">
+                    <mat-label>City</mat-label>
+                    <input type="text" matInput formControlName="city" placeholder="Start typing your city..."
+                        [matAutocomplete]="cityAuto" (input)="filterCities($any($event.target).value)">
+                    <mat-autocomplete #cityAuto="matAutocomplete">
+                        @for (city of filteredCities; track city) {
+                        <mat-option [value]="city">{{ city }}</mat-option>
+                        }
+                    </mat-autocomplete>
+                </mat-form-field>
+
+                <!-- ABOUT YOU -->
+                <p class="section-heading">About You</p>
+
+                <!-- Interest Chips -->
+                <div class="chips-group">
+                    <label class="chips-label">Topics of Interest</label>
+                    <mat-chip-set aria-label="Interest selection">
+                        @for (interest of interests; track interest) {
+                        <mat-chip [class.selected-chip]="isSelected(interest)" (click)="toggleInterest(interest)">
+                            {{ interest }}
+                        </mat-chip>
+                        }
+                    </mat-chip-set>
+                </div>
+
+                <!-- Experience Level Slider -->
+                <div class="slider-group">
+                    <label class="slider-label">
+                        Tech Experience Level
+                        <span class="level-badge">{{ formdata.get('experienceLevel')?.value }} / 5</span>
+                    </label>
+                    <mat-slider [min]="minLevel" [max]="maxLevel" [step]="1" [discrete]="true">
+                        <input matSliderThumb formControlName="experienceLevel">
+                    </mat-slider>
+                </div>
+
+                <!-- Short Bio -->
+                <mat-form-field appearance="outline">
+                    <mat-label>Short Bio</mat-label>
+                    <textarea matInput placeholder="Tell us about yourself and why you're joining..."
+                        formControlName="bio" rows="3"></textarea>
+                </mat-form-field>
+
+                <!-- Submit -->
+                <button mat-raised-button class="submit-btn" type="submit">
+                    Register for Summit →
+                </button>
+
+                <!-- Result Summary -->
+                @if (submitted && formdata.valid && submittedData) {
+                <div class="result-card">
+                    <div class="result-header">
+                        <span style="font-size: 24px;">✅</span>
+                        <span class="result-title">Registration Confirmed!</span>
+                    </div>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="label">Full Name</div>
+                            <div class="value">{{ submittedData.fullName }}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Email</div>
+                            <div class="value">{{ submittedData.email }}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Gender</div>
+                            <div class="value">{{ submittedData.gender | titlecase }}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Date of Birth</div>
+                            <div class="value">{{ submittedData.birthDate | date:'mediumDate' }}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">City</div>
+                            <div class="value">{{ submittedData.city || '—' }}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Session Time</div>
+                            <div class="value">{{ submittedData.sessionTime | date:'shortTime' }}</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="label">Experience Level</div>
+                            <div class="value">{{ submittedData.experienceLevel }} / 5</div>
+                        </div>
+                        <div class="result-item result-chips">
+                            <div class="label">Interests</div>
+                            <div class="value">
+                                @if (selectedInterests.length > 0) {
+                                <mat-chip-set>
+                                    @for (i of selectedInterests; track i) {
+                                    <mat-chip class="selected-chip">{{ i }}</mat-chip>
+                                    }
+                                </mat-chip-set>
+                                } @else {
+                                None selected
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+
+            </form>
+        </div>
+
+        <p class="page-footer">© 2025 Youth Innovation Summit · All rights reserved</p>
+    </div>
+
+</div>
